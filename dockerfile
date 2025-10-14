@@ -1,5 +1,5 @@
 # Usamos una imagen oficial de PHP con el servidor web Apache
-FROM php:8.1-apache
+FROM php:8.3-apache
 
 # 1. INSTALAR DEPENDENCIAS DEL SISTEMA
 # Actualizamos e instalamos librerías que Moodle necesita
