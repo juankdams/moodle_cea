@@ -2,33 +2,44 @@ services:
   mariadb:
     image: mariadb:10.6
     container_name: moodle-db
+    restart: unless-stopped
     environment:
-      # ¡Recuerda usar tus contraseñas seguras aquí!
-      MYSQL_ROOT_PASSWORD: "your_strong_root_password"
+      # Recuerda usar tus contraseñas seguras aquí
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
       MYSQL_DATABASE: "moodle"
       MYSQL_USER: "moodleuser"
-      MYSQL_PASSWORD: "your_strong_moodle_password"
+      MYSQL_PASSWORD: "Damsjuan10!"
     volumes:
       - db_data:/var/lib/mysql
     command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
-    restart: unless-stopped
+    # --- CAMBIO CLAVE: Conectamos el servicio a nuestra red ---
+    networks:
+      - moodle-net
 
   moodle:
     build: .
     container_name: moodle-app
+    restart: unless-stopped
     ports:
       - "8080:80"
     environment:
       MOODLE_DATABASE_HOST: mariadb
-      MOODLE_DATABASE_USER: "soluciones"
-      MOODLE_DATABASE_PASSWORD: "Damsjuan10!"
+      MOODLE_DATABASE_USER: "moodleuser"
+      MOODLE_DATABASE_PASSWORD: "${DB_PASSWORD}"
       MOODLE_DATABASE_NAME: "moodle"
+    depends_on:
+      - mariadb
     volumes:
       - moodle_code:/var/www/html
       - moodledata_data:/var/www/moodledata
-    depends_on:
-      - mariadb
-    restart: unless-stopped
+    # --- CAMBIO CLAVE: Conectamos el servicio a nuestra red ---
+    networks:
+      - moodle-net
+
+# --- CAMBIO CLAVE: Definimos la red que usarán los servicios ---
+networks:
+  moodle-net:
+    driver: bridge
 
 volumes:
   db_data:
