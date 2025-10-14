@@ -20,8 +20,8 @@ services:
       - "8080:80"
     environment:
       MOODLE_DATABASE_HOST: mariadb
-      MOODLE_DATABASE_USER: "moodleuser"
-      MOODLE_DATABASE_PASSWORD: "your_strong_moodle_password"
+      MOODLE_DATABASE_USER: "soluciones"
+      MOODLE_DATABASE_PASSWORD: "Damsjuan10!"
       MOODLE_DATABASE_NAME: "moodle"
     volumes:
       - moodle_code:/var/www/html
