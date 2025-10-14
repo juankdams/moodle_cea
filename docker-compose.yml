@@ -1,32 +1,42 @@
-    version: '3.8'
-    services:
-      db:
-        image: mysql:8.0
-        environment:
-          MYSQL_ROOT_PASSWORD: your_root_password
-          MYSQL_DATABASE: moodle
-          MYSQL_USER: moodleuser
-          MYSQL_PASSWORD: your_moodle_password
-        volumes:
-          - db_data:/var/lib/mysql
+# La línea 'version' ha sido eliminada
 
-      moodle:
-        image: bitnami/moodle:latest
-        environment:
-          MOODLE_DATABASE_HOST: db
-          MOODLE_DATABASE_PORT: 3306
-          MOODLE_DATABASE_USER: moodleuser
-          MOODLE_DATABASE_PASSWORD: your_moodle_password
-          MOODLE_DATABASE_NAME: moodle
-        ports:
-          - "8080:80"
-          - "8443:443"
-        volumes:
-          - moodle_data:/bitnami/moodle
-          - moodle_data:/bitnami/moodledata
-        depends_on:
-          - db
-
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: moodle-db
+    environment:
+      # Asegúrate de que estas contraseñas sean seguras
+      MYSQL_ROOT_PASSWORD: "your_strong_root_password"
+      MYSQL_DATABASE: "moodle"
+      MYSQL_USER: "moodleuser"
+      MYSQL_PASSWORD: "your_strong_moodle_password"
     volumes:
-      db_data:
-      moodle_data:
+      - db_data:/var/lib/mysql
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    restart: unless-stopped
+
+  moodle:
+    # CAMBIO CLAVE: Se especifica la versión 4.4 en lugar de 'latest'
+    image: bitnami/moodle:4.4
+    container_name: moodle-app
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      MOODLE_DATABASE_HOST: mariadb
+      MOODLE_DATABASE_PORT_NUMBER: 3306
+      MOODLE_DATABASE_USER: "moodleuser"
+      MOODLE_DATABASE_PASSWORD: "your_strong_moodle_password"
+      MOODLE_DATABASE_NAME: "moodle"
+      ALLOW_EMPTY_PASSWORD: "no"
+    volumes:
+      - moodle_data:/bitnami/moodle
+      - moodledata_data:/bitnami/moodledata
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  moodle_data:
+  moodledata_data:
