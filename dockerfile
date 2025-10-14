@@ -1,13 +1,8 @@
-# Usamos una imagen oficial de PHP con el servidor web Apache ya incluido
+# Usamos una imagen oficial de PHP con el servidor web Apache
 FROM php:8.1-apache
 
-# Variables de entorno para Moodle
-ENV MOODLE_HOME /var/www/html
-WORKDIR $MOODLE_HOME
-
 # 1. INSTALAR DEPENDENCIAS DEL SISTEMA
-# Actualizamos el sistema e instalamos herramientas y librerías que Moodle necesita
-# (para procesar imágenes, conectar a la base de datos, etc.)
+# Actualizamos e instalamos librerías que Moodle necesita
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -22,18 +17,19 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. INSTALAR EXTENSIONES DE PHP
-# Moodle necesita un montón de extensiones de PHP. Este comando las instala.
 RUN docker-php-ext-install -j$(nproc) gd pgsql pdo_pgsql intl zip soap opcache
 
 # 3. COPIAR TU CÓDIGO DE MOODLE
-# Copiamos todo el código de tu repositorio a la carpeta del servidor web dentro del contenedor
-COPY . .
+# --- CAMBIO CLAVE ---
+# Borramos el contenido de ejemplo de Apache y copiamos explícitamente
+# el código de tu repositorio a la carpeta correcta.
+RUN rm -fr /var/www/html/*
+COPY . /var/www/html/
 
-# 4. CREAR LA CARPETA 'moodledata' Y ASIGNAR PERMISOS
-# Creamos la carpeta donde Moodle guarda los archivos de los cursos
-# y nos aseguramos de que el servidor web (www-data) tenga permiso para escribir en ella.
+# 4. CREAR CARPETA 'moodledata' Y ASIGNAR PERMISOS
+# --- CAMBIO CLAVE ---
+# Nos aseguramos de que los permisos se apliquen a todo el código de Moodle
+# y a la carpeta de datos, después de haberlos copiado.
 RUN mkdir -p /var/www/moodledata && \
-    chown -R www-data:www-data /var/www/moodledata && \
-    chown -R www-data:www-data $MOODLE_HOME
-
-# El servidor Apache ya está configurado para ejecutarse por defecto en esta imagen base
+    chown -R www-data:www-data /var/www/html && \
+    chown -R www-data:www-data /var/www/moodledata
