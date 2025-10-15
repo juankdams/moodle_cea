@@ -1,7 +1,9 @@
-# Usamos la versión estable y moderna 8.3 de PHP
+# Usamos la imagen oficial de PHP 8.3 con Apache
 FROM php:8.3-apache
 
-# 1. INSTALAR DEPENDENCIAS DEL SISTEMA
+# Instala las dependencias del sistema necesarias para las extensiones de Moodle
+# AÑADIDO: libpq-dev para PostgreSQL
+# QUITADO: default-libmysqlclient-dev para MySQL
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -12,19 +14,21 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     ghostscript \
     unzip \
-    # Añadimos las librerías cliente de MariaDB/MySQL
-    default-libmysqlclient-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. INSTALAR EXTENSIONES DE PHP
-# --- CAMBIO CLAVE: Añadimos mysqli y pdo_mysql ---
-RUN docker-php-ext-install -j$(nproc) gd intl zip soap opcache mysqli pdo_mysql
+# Instala las extensiones de PHP necesarias para Moodle
+# AÑADIDO: pgsql y pdo_pgsql para PostgreSQL
+# QUITADO: mysqli y pdo_mysql para MySQL
+RUN docker-php-ext-install -j$(nproc) gd intl zip soap opcache pgsql pdo_pgsql
 
-# 3. COPIAR TU CÓDIGO DE MOODLE
+# Limpia el directorio por defecto de Apache
 RUN rm -fr /var/www/html/*
+
+# Copia los archivos de Moodle al directorio de Apache
 COPY . /var/www/html/
 
-# 4. CREAR CARPETA 'moodledata' Y ASIGNAR PERMISOS
+# Crea el directorio moodledata y asigna los permisos correctos
 RUN mkdir -p /var/www/moodledata && \
     chown -R www-data:www-data /var/www/html && \
     chown -R www-data:www-data /var/www/moodledata
