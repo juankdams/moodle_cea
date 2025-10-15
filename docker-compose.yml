@@ -1,9 +1,6 @@
 # ===============================================================
-#   Docker Compose para Moodle con PostgreSQL
-#   Credenciales: user=soluciones, pwd=Damsjuan10!
+#   Docker Compose para Moodle con PostgreSQL (Versión actualizada)
 # ===============================================================
-version: '3.8'
-
 services:
   # --- Servicio de Base de Datos PostgreSQL ---
   postgres:
@@ -12,8 +9,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: "moodle"
-      POSTGRES_USER: "soluciones"      # Tu usuario especificado
-      POSTGRES_PASSWORD: "Damsjuan10!" # Tu contraseña especificada
+      POSTGRES_USER: "soluciones"
+      POSTGRES_PASSWORD: "Damsjuan10!"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -27,12 +24,11 @@ services:
     ports:
       - "8080:80"
     environment:
-      # Variables para conectar Moodle con PostgreSQL
       MOODLE_DB_TYPE: "pgsql"
       MOODLE_DATABASE_HOST: "postgres"
       MOODLE_DATABASE_NAME: "moodle"
-      MOODLE_DATABASE_USER: "soluciones"      # Tu usuario especificado
-      MOODLE_DATABASE_PASSWORD: "Damsjuan10!" # Tu contraseña especificada
+      MOODLE_DATABASE_USER: "soluciones"
+      MOODLE_DATABASE_PASSWORD: "Damsjuan10!"
     depends_on:
       - postgres
     volumes:
