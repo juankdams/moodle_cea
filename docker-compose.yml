@@ -1,21 +1,25 @@
+# ===============================================================
+#   Docker Compose para Moodle con PostgreSQL
+#   Credenciales: user=soluciones, pwd=Damsjuan10!
+# ===============================================================
+version: '3.8'
+
 services:
-  mariadb:
-    image: mariadb:10.6
-    container_name: moodle-db
+  # --- Servicio de Base de Datos PostgreSQL ---
+  postgres:
+    image: postgres:15
+    container_name: moodle-postgres-db
     restart: unless-stopped
     environment:
-      # Ambas contraseñas ahora usan variables que configurarás en Dokploy
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "moodle"
-      MYSQL_USER: "moodleuser"
-      # --- CORRECCIÓN CLAVE: Usamos la variable para consistencia ---
-      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "moodle"
+      POSTGRES_USER: "soluciones"      # Tu usuario especificado
+      POSTGRES_PASSWORD: "Damsjuan10!" # Tu contraseña especificada
     volumes:
-      - db_data:/var/lib/mysql
-    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - moodle-net
 
+  # --- Servicio de Aplicación Moodle ---
   moodle:
     build: .
     container_name: moodle-app
@@ -23,24 +27,27 @@ services:
     ports:
       - "8080:80"
     environment:
-      # Estas variables se conectan a la configuración de mariadb
-      MOODLE_DATABASE_HOST: mariadb
-      MOODLE_DATABASE_USER: "moodleuser"
-      MOODLE_DATABASE_PASSWORD: "${DB_PASSWORD}"
+      # Variables para conectar Moodle con PostgreSQL
+      MOODLE_DB_TYPE: "pgsql"
+      MOODLE_DATABASE_HOST: "postgres"
       MOODLE_DATABASE_NAME: "moodle"
+      MOODLE_DATABASE_USER: "soluciones"      # Tu usuario especificado
+      MOODLE_DATABASE_PASSWORD: "Damsjuan10!" # Tu contraseña especificada
     depends_on:
-      - mariadb
+      - postgres
     volumes:
       - moodle_code:/var/www/html
       - moodledata_data:/var/www/moodledata
     networks:
       - moodle-net
 
+# --- Configuración de Red ---
 networks:
   moodle-net:
     driver: bridge
 
+# --- Definición de Volúmenes ---
 volumes:
-  db_data:
+  postgres_data:
   moodle_code:
   moodledata_data:
